@@ -3,13 +3,28 @@ import { Consumer } from "../../context";
 import TextInputGroup from "../layout/TextInputGroup";
 import axios from "axios";
 
-export class AddContact extends Component {
+export class EditContact extends Component {
   state = {
     name: "",
     email: "",
     phone: "",
     errors: {}
   };
+
+  async componentDidMount() {
+    const { id } = this.props.match.params;
+    const res = await axios.get(
+      `https://jsonplaceholder.typicode.com/users/${id}`
+    );
+
+    const contact = res.data;
+
+    this.setState({
+      name: contact.name,
+      email: contact.email,
+      phone: contact.phone
+    });
+  }
 
   onSubmit = async (dispatch, e) => {
     e.preventDefault();
@@ -30,18 +45,19 @@ export class AddContact extends Component {
       return;
     }
 
-    const newContact = {
+    const updatedContact = {
       name,
       email,
       phone
     };
+    const { id } = this.props.match.params;
 
-    const res = await axios.post(
-      "https://jsonplaceholder.typicode.com/users",
-      newContact
+    const res = await axios.put(
+      `https://jsonplaceholder.typicode.com/users/${id}`,
+      updatedContact
     );
 
-    dispatch({ type: "ADD_CONTACT", payload: res.data });
+    dispatch({ type: "UPDATE_CONTACT", payload: res.data });
 
     this.setState({
       name: "",
@@ -95,7 +111,7 @@ export class AddContact extends Component {
                   />
                   <input
                     type="submit"
-                    value="Add contact"
+                    value="Update contact"
                     className="btn btn-dark btn-block"
                   />
                 </form>
@@ -108,4 +124,4 @@ export class AddContact extends Component {
   }
 }
 
-export default AddContact;
+export default EditContact;
